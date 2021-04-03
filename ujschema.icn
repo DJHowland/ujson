@@ -2,6 +2,7 @@
 # ujschema - json schema validation.
 #
 # Author: Jafar Al-Gharaibeh
+# Author: Derek Howland
 #
 # Date: March 2021
 #
@@ -56,18 +57,150 @@ end
 procedure js_validate(jfname, sfname)
    local json_date, json_schema
    json_data   := jtou(jfname , "f")
-   json_schema := jtou(sfname , "f")
+   json_schema := jtou(sfname , "s")
+   
 
    write("\n")
-   write("json data dump: ")
-   write(ximage(json_data))
+   #write("json data dump: ")
+   #write(ximage(json_data))
+   dumpschema(json_schema)
 
-   write("\n")
-   write("json schema dump: ")
-   write(ximage(json_schema))
+   #write("\n")
+   #write("json schema dump: ")
+   #write(ximage(json_schema))
 end
 
 
 
 
 
+
+#every k := key(x) do
+ #     		case k of {
+  #    			"description": write(space, "type: ", k, "   value: ", x[k])
+   #   			"minProperties": write(space, "type: ", k, "   value: ", x[k])
+    #  			"maxProperties": write(space, "type: ", k, "   value: ", x[k])
+     # 			"required": {
+      #				y := x["required"]
+    	#			every write(space, "   field: ", left(k := key(y), 20) , "    type:",
+    	#			 left(image(y[k]), 20)) do
+     	#				dumpschema(y[k])
+      	#		}
+      	#		"type": write(space, "type: ", k, "   value: ", x[k])
+      	#		"enum": write(space, "type: ", k, "   value: ", x[k])
+      	#		"cons": write(space, "type: ", k, "   value: ", x[k])
+      	#		"properties": {
+      	#			y := x["properties"]
+    	#			every write(space, "   field: ", left(k := key(y), 20) , "    type:",
+    	#			 left(image(y[k]["type"]), 20)) do
+     	#				dumpschema(y[k])
+      	#		}
+      	#	}
+
+procedure dumpschema(x)  
+   local k, space := repl("   ", &level - 3)
+   case x["type"] of {
+      "object" :{
+      	minp := x["minProperties"]
+      	maxp := x["maxProperties"]
+      	required := x["required"]
+  	#write(space, " required: ", fullimage(required))
+      	y := x["properties"]
+    	every write(space, "   field: ", left(k := key(y), 20) , "    type:",
+    		left(image(y[k]["type"]), 20)) do
+     		dumpschema(y[k])
+      	write("\n")
+      }
+      "array": {
+      	y := x["items"]
+      	write(space, "items type: ", left(image(y["type"]), 20))
+      	every k := key(x) do
+      		case k of {
+      			#"description": write(space, "type: ", k, "   value: ", x[k])
+      			"additionalItems": write(space, "type: ", k, "   value: ", x[k])
+      			"minItems": write(space, "type: ", k, "   value: ", x[k])
+      			"maxItems": write(space, "type: ", k, "   value: ", x[k])
+      			"uniqueItems": write(space, "type: ", k, "   value: ", x[k])
+      			"contains": write(space, "type: ", k, "   value: ", x[k])
+      			#"type": write(space, "type: ", k, "   value: ", x[k])
+      			"enum": write(space, "type: ", k, "   value: ", x[k])
+      			"const": write(space, "type: ", k, "   value: ", x[k])
+      		}
+      	write("\n")
+      }
+      "number": {
+      	every k := key(x) do
+      		case k of {
+      			#"description": write(space, "type: ", k, "   value: ", x[k])
+      			"multipleOf": write(space, "type: ", k, "   value: ", x[k])
+      			"maximum": write(space, "type: ", k, "   value: ", x[k])
+      			"exclusiveMaximum": write(space, "type: ", k, "   value: ", x[k])
+      			"minimum": write(space, "   items type:", left(image(y["type"]), 20))
+      			"exclusiveMinimum": write(space, "type: ", k, "   value: ", x[k])
+      			#"type": write(space, "type: ", k, "   value: ", x[k])
+      			"enum": write(space, "type: ", k, "   value: ", x[k])
+      			"const": write(space, "type: ", k, "   value: ", x[k])
+      			"number": write(space, "type: ", k, "   value: ", x[k])
+      		}
+      	write("\n")
+      }
+      "string": {
+      	every k := key(x) do
+      		case k of {
+      			#"description": write(space, "type: ", k, "   value: ", x[k])
+      			"minLength": write(space, "type: ", k, "   value: ", x[k])
+      			"maxLength": write(space, "type: ", k, "   value: ", x[k])
+      			"pattern": write(space, "type: ", k, "   value: ", x[k])
+      			#"type": write(space, "type: ", k, "   value: ", x[k])
+      			"enum": write(space, "type: ", k, "   value: ", x[k])
+      			"const": write(space, "type: ", k, "   value: ", x[k])
+      			"string": write(space, "type: ", k, "   value: ", x[k])
+      		}
+  	write("\n")
+      }
+      "boolean": {
+      	every k := key(x) do
+      		case k of {
+      			"allOf": write(space, "type: ", k, "   value: ", x[k])
+      			"anyOf": write(space, "type: ", k, "   value: ", x[k])
+			"oneOf": write(space, "type: ", k, "   value: ", x[k])
+			"not": write(space, "type: ", k, "   value: ", x[k])
+      			#"description": write(space, "type: ", k, "   value: ", x[k])
+      			"uniqueItems": write(space, "type: ", k, "   value: ", x[k])
+      			#"type": write(space, "type: ", k, "   value: ", x[k])
+      			"enum": write(space, "type: ", k, "   value: ", x[k])
+      			"const": write(space, "type: ", k, "   value: ", x[k])
+      			"boolean": write(space, "type: ", k, "   value: ", x[k])
+      		}
+      	write("\n")
+      }
+      "integer": {
+      	every k := key(x) do
+      		case k of {
+      			#"description": write(space, "type: ", k, "   value: ", x[k])
+      			"multipleOf": write(space, "type: ", k, "   value: ", x[k])
+      			"maximum": write(space, "type: ", k, "   value: ", x[k])
+      			"exclusiveMaximum": write(space, "type: ", k, "   value: ", x[k])
+      			"minimum": write(space, "type: ", k, "   value: ", x[k])
+      			"exclusiveMinimum": write(space, "type: ", k, "   value: ", x[k])
+      			#"type": write(space, "type: ", k, "   value: ", x[k])
+      			"enum": write(space, "type: ", k, "   value: ", x[k])
+      			"const": write(space, "type: ", k, "   value: ", x[k])
+      			"integer": write(space, "type: ", k, "   value: ", x[k])
+      		}
+      	write("\n")
+      }
+      "null": {
+      	every k := key(x) do
+      		case k of {
+      			#"description": write(space, "type: ", k, "   value: ", x[k])
+      			#"type": write(space, "type: ", k, "   value: ", x[k])
+      			"enum": write(space, "type: ", k, "   value: ", x[k])
+      			"const": write(space, "type: ", k, "   value: ", x[k])
+      			"null": write(space, "type: ", k, "   value: ", x[k])
+      		}
+      	write("\n")
+      }
+      default: {write("\n")}
+   }
+end
